@@ -35,7 +35,6 @@ NewRound(a) ==
     /\ Responded' = [Responded EXCEPT ![a] = {}]
     /\ UNCHANGED <<Peers, State>>
 
-\* This node should also extend peers?
 Respond(a) ==
     /\ \E m \in Msgs:
         /\ m.type = "Request"
