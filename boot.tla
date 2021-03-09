@@ -27,12 +27,10 @@ TypeOK ==
     /\ Responded \in [Node -> SUBSET Node]
     /\ Sent \in [Node -> SUBSET Node]
 
-NewRound(a) ==
-    /\ Responded[a] = Sent[a]
+Request(a) ==
     /\ Peers[a] /= Responded[a]
     /\ Sent' = [Sent EXCEPT ![a] = Peers[a]]
     /\ Msgs' = Msgs \cup {[type |-> "Request", src |-> a, dst |-> b]: b \in Peers[a]}
-    /\ Responded' = [Responded EXCEPT ![a] = {}]
     /\ UNCHANGED <<Peers, State>>
 
 Respond(a) ==
@@ -95,7 +93,7 @@ Init ==
 Next ==
     /\ \/ \E a \in Node: Respond(a)
        \/ \E a \in Node: HandleResponse(a)
-       \/ \E a \in Node: NewRound(a)
+       \/ \E a \in Node: Request(a)
        \/ \E a \in Node: BecomeLeader(a)
     /\ UNCHANGED <<Seeds>>
 
