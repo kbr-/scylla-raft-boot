@@ -1,7 +1,7 @@
 ---- MODULE boot ----
 
 EXTENDS
-    Integers, Naturals, TLC
+    Integers, Naturals, TLC, FiniteSets
 
 CONSTANTS
     Node
@@ -79,8 +79,10 @@ Inv3 ==
     \/ \E a \in Node: State[a] = "Leader"
     \/ \A a \in Node: State[a] /= "Found"
 
+PossibleSeeds == {s \in SUBSET Node: Cardinality(s) <= 3 /\ s /= {}}
+
 Init ==
-    /\ Seeds \in [Node -> ((SUBSET Node) \ {{}})]
+    /\ Seeds \in [Node -> PossibleSeeds]
     /\ \A a, b \in Node: Seeds[a] \cap Seeds[b] /= {}
     /\ Msgs = {}
     /\ Peers = [a \in Node |-> Seeds[a] \cup {a}]
