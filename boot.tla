@@ -5,10 +5,8 @@ EXTENDS
 
 CONSTANTS
     Node
-\*    Seeds
 
 VARIABLES
-    Seeds,
     Msgs,
     Peers,
     State,
@@ -16,7 +14,6 @@ VARIABLES
 
 TypeOK ==
     /\ Node \subseteq Nat
-    /\ Seeds \in [Node -> SUBSET Node]
     /\ Msgs \subseteq
             [type: {"Response"}, src: Node, dst: Node,
                peers: SUBSET Node, leader: Node \cup {-1}]
@@ -72,10 +69,9 @@ Inv3 ==
 PossibleSeeds == {s \in SUBSET Node: Cardinality(s) <= 3 /\ s /= {}}
 
 Init ==
-    /\ Seeds \in [Node -> PossibleSeeds]
-    /\ \A a, b \in Node: Seeds[a] \cap Seeds[b] /= {}
+    /\ Peers \in {f \in [Node -> PossibleSeeds]: \A n \in Node: n \in f[n]}
+    /\ \A a, b \in Node: Peers[a] \cap Peers[b] /= {}
     /\ Msgs = {}
-    /\ Peers = [a \in Node |-> Seeds[a] \cup {a}]
     /\ State = [a \in Node |-> "Looking"]
     /\ Responded = [a \in Node |-> {}]
 
@@ -83,6 +79,5 @@ Next ==
     /\ \/ \E a \in Node: Respond(a)
        \/ \E a \in Node: HandleResponse(a)
        \/ \E a \in Node: BecomeLeader(a)
-    /\ UNCHANGED <<Seeds>>
 
 =====================
