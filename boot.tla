@@ -64,7 +64,6 @@ HandleResponse(a) ==
         /\ Msgs' = Msgs \ {m}
 
 BecomeLeader(a) ==
-    /\ Responded[a] = Sent[a]
     /\ Peers[a] = Responded[a]
     /\ \A p \in Peers[a]: a <= p
     /\ State' = [State EXCEPT ![a] = "Leader"]
