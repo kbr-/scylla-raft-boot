@@ -18,29 +18,22 @@ TypeOK ==
     /\ Node \subseteq Nat
     /\ Seeds \in [Node -> SUBSET Node]
     /\ Msgs \subseteq
-         [type: {"Request"}, src: Node, dst: Node]
-            \cup [type: {"Response"}, src: Node, dst: Node,
-                    peers: SUBSET Node, leader: Node \cup {-1}]
+            [type: {"Response"}, src: Node, dst: Node,
+               peers: SUBSET Node, leader: Node \cup {-1}]
     /\ Peers \in [Node -> SUBSET Node]
     /\ State \in [Node -> {"Looking", "Found", "Leader"}]
     /\ Responded \in [Node -> SUBSET Node]
 
-Request(a) ==
-    /\ Peers[a] /= Responded[a]
-    /\ Msgs' = Msgs \cup {[type |-> "Request", src |-> a, dst |-> b]: b \in Peers[a]}
-    /\ UNCHANGED <<Peers, State, Responded>>
-
 Respond(a) ==
-    /\ \E m \in Msgs:
-        /\ m.type = "Request"
-        /\ m.dst = a
+    /\ \E src \in Node:
+        /\ a \in Peers[src]
         /\ ~ \E mm \in Msgs:
             /\ mm.type = "Response"
             /\ mm.src = a
-            /\ mm.dst = m.src
-        /\ Peers' = [Peers EXCEPT ![a] = Peers[a] \cup {m.src}]
+            /\ mm.dst = src
+        /\ Peers' = [Peers EXCEPT ![a] = Peers[a] \cup {src}]
         /\ Msgs' = Msgs \cup {
-            [type |-> "Response", src |-> a, dst |-> m.src,
+            [type |-> "Response", src |-> a, dst |-> src,
              peers |-> Peers[a], leader |-> IF State[a] = "Leader" THEN a ELSE -1]}
     /\ UNCHANGED <<State, Responded>>
 
@@ -89,7 +82,6 @@ Init ==
 Next ==
     /\ \/ \E a \in Node: Respond(a)
        \/ \E a \in Node: HandleResponse(a)
-       \/ \E a \in Node: Request(a)
        \/ \E a \in Node: BecomeLeader(a)
     /\ UNCHANGED <<Seeds>>
 
