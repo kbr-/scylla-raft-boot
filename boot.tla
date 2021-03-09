@@ -40,10 +40,14 @@ Respond(a) ==
     /\ \E m \in Msgs:
         /\ m.type = "Request"
         /\ m.dst = a
+        /\ ~ \E mm \in Msgs:
+            /\ mm.type = "Response"
+            /\ mm.src = a
+            /\ mm.dst = m.src
         /\ Peers' = [Peers EXCEPT ![a] = Peers[a] \cup {m.src}]
-        /\ Msgs' = (Msgs \cup {
+        /\ Msgs' = Msgs \cup {
             [type |-> "Response", src |-> a, dst |-> m.src,
-             peers |-> Peers[a], leader |-> IF State[a] = "Leader" THEN a ELSE -1]}) \ {m}
+             peers |-> Peers[a], leader |-> IF State[a] = "Leader" THEN a ELSE -1]}
     /\ UNCHANGED <<Sent, State, Responded>>
 
 HandleResponse(a) ==
@@ -58,7 +62,7 @@ HandleResponse(a) ==
               /\ Peers' = [Peers EXCEPT ![a] = Peers[a] \cup m.peers]
               /\ Responded' = [Responded EXCEPT ![a] = Responded[a] \cup {m.src}]
               /\ UNCHANGED <<State, Sent>>
-    /\ UNCHANGED <<Msgs>>
+        /\ Msgs' = Msgs \ {m}
 
 BecomeLeader(a) ==
     /\ Responded[a] = Sent[a]
