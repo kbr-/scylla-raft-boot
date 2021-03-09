@@ -19,7 +19,7 @@ TypeOK ==
     /\ Node \subseteq Nat
     /\ Seeds \in [Node -> SUBSET Node]
     /\ Msgs \subseteq
-         [type: {"Request"}, src: Node, dst: Node, peers: SUBSET Node]
+         [type: {"Request"}, src: Node, dst: Node]
             \cup [type: {"Response"}, src: Node, dst: Node,
                     peers: SUBSET Node, leader: Node \cup {-1}]
     /\ Peers \in [Node -> SUBSET Node]
@@ -31,7 +31,7 @@ NewRound(a) ==
     /\ Responded[a] = Sent[a]
     /\ Peers[a] /= Responded[a]
     /\ Sent' = [Sent EXCEPT ![a] = Peers[a]]
-    /\ Msgs' = Msgs \cup {[type |-> "Request", src |-> a, dst |-> b, peers |-> Peers[a]]: b \in Peers[a]}
+    /\ Msgs' = Msgs \cup {[type |-> "Request", src |-> a, dst |-> b]: b \in Peers[a]}
     /\ Responded' = [Responded EXCEPT ![a] = {}]
     /\ UNCHANGED <<Peers, State>>
 
@@ -40,10 +40,10 @@ Respond(a) ==
     /\ \E m \in Msgs:
         /\ m.type = "Request"
         /\ m.dst = a
-        /\ Peers' = [Peers EXCEPT ![a] = Peers[a] \cup m.peers]
-        /\ Msgs' = Msgs \cup {
+        /\ Peers' = [Peers EXCEPT ![a] = Peers[a] \cup {m.src}]
+        /\ Msgs' = (Msgs \cup {
             [type |-> "Response", src |-> a, dst |-> m.src,
-             peers |-> Peers[a], leader |-> IF State[a] = "Leader" THEN a ELSE -1]}
+             peers |-> Peers[a], leader |-> IF State[a] = "Leader" THEN a ELSE -1]}) \ {m}
     /\ UNCHANGED <<Sent, State, Responded>>
 
 HandleResponse(a) ==
