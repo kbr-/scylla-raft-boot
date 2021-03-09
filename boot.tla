@@ -28,7 +28,7 @@ TypeOK ==
 Request(a) ==
     /\ Peers[a] /= Responded[a]
     /\ Msgs' = Msgs \cup {[type |-> "Request", src |-> a, dst |-> b]: b \in Peers[a]}
-    /\ UNCHANGED <<Peers, State>>
+    /\ UNCHANGED <<Peers, State, Responded>>
 
 Respond(a) ==
     /\ \E m \in Msgs:
